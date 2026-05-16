@@ -1,27 +1,82 @@
-import 'package:freezed_annotation/freezed_annotation.dart';
-
-part 'transfer_session.freezed.dart';
-part 'transfer_session.g.dart';
-
 enum TransferDirection { upload, download }
 enum TransferState { queued, active, paused, complete, failed, cancelled }
 
-@freezed
-class TransferSession with _$TransferSession {
-  const factory TransferSession({
-    required String id,
-    required String fileName,
-    required int totalBytes,
-    required int transferredBytes,
-    required double speedBps,
-    required TransferDirection direction,
-    required TransferState state,
-    required String targetDeviceId,
-    required DateTime startedAt,
-    DateTime? completedAt,
-  }) = _TransferSession;
+class TransferSession {
+  final String id;
+  final String fileName;
+  final int totalBytes;
+  final int transferredBytes;
+  final double speedBps;
+  final TransferDirection direction;
+  final TransferState state;
+  final String targetDeviceId;
+  final DateTime startedAt;
+  final DateTime? completedAt;
 
-  factory TransferSession.fromJson(Map<String, dynamic> json) => _$TransferSessionFromJson(json);
+  TransferSession({
+    required this.id,
+    required this.fileName,
+    required this.totalBytes,
+    required this.transferredBytes,
+    required this.speedBps,
+    required this.direction,
+    required this.state,
+    required this.targetDeviceId,
+    required this.startedAt,
+    this.completedAt,
+  });
+
+  TransferSession copyWith({
+    String? id,
+    String? fileName,
+    int? totalBytes,
+    int? transferredBytes,
+    double? speedBps,
+    TransferDirection? direction,
+    TransferState? state,
+    String? targetDeviceId,
+    DateTime? startedAt,
+    DateTime? completedAt,
+  }) {
+    return TransferSession(
+      id: id ?? this.id,
+      fileName: fileName ?? this.fileName,
+      totalBytes: totalBytes ?? this.totalBytes,
+      transferredBytes: transferredBytes ?? this.transferredBytes,
+      speedBps: speedBps ?? this.speedBps,
+      direction: direction ?? this.direction,
+      state: state ?? this.state,
+      targetDeviceId: targetDeviceId ?? this.targetDeviceId,
+      startedAt: startedAt ?? this.startedAt,
+      completedAt: completedAt ?? this.completedAt,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'fileName': fileName,
+    'totalBytes': totalBytes,
+    'transferredBytes': transferredBytes,
+    'speedBps': speedBps,
+    'direction': direction.name,
+    'state': state.name,
+    'targetDeviceId': targetDeviceId,
+    'startedAt': startedAt.toIso8601String(),
+    'completedAt': completedAt?.toIso8601String(),
+  };
+
+  factory TransferSession.fromJson(Map<String, dynamic> json) => TransferSession(
+    id: json['id'] as String,
+    fileName: json['fileName'] as String,
+    totalBytes: json['totalBytes'] as int,
+    transferredBytes: json['transferredBytes'] as int,
+    speedBps: (json['speedBps'] as num).toDouble(),
+    direction: TransferDirection.values.byName(json['direction'] as String),
+    state: TransferState.values.byName(json['state'] as String),
+    targetDeviceId: json['targetDeviceId'] as String,
+    startedAt: DateTime.parse(json['startedAt'] as String),
+    completedAt: json['completedAt'] != null ? DateTime.parse(json['completedAt'] as String) : null,
+  );
 }
 
 class TransferProgress {

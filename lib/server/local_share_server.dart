@@ -142,7 +142,7 @@ void _serverMain(Map<String, dynamic> args) async {
     if (message is ServerCommand) {
       if (message.type == 'STOP') {
         server.close();
-        Isolate.current.exit();
+        Isolate.exit();
       } else if (message.type == 'BROADCAST') {
         final json = jsonEncode(message.payload);
         for (final client in wsClients) {
