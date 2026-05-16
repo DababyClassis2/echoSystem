@@ -5,14 +5,13 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
-  workflow_dispatch:  # allows manual trigger
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -38,17 +37,21 @@ jobs:
           flutter-version: '3.27.4'
           channel: 'stable'
 
-      - name: Get Flutter dependencies
-        run: flutter pub get
-
       - name: Create local.properties
         run: echo "flutter.sdk=$FLUTTER_ROOT" > android/local.properties
 
-      - name: Generate Gradle Wrapper
+      - name: Fix Gradle wrapper (use Flutter's default)
         run: |
+          # Remove any existing gradle wrapper that might be broken
+          rm -rf android/gradle android/gradlew android/gradlew.bat
+          # Let Flutter create a fresh, compatible wrapper
           cd android
-          gradle wrapper
-          chmod +x gradlew
+          flutter build apk --dry-run || true
+          cd ..
+        continue-on-error: true
+
+      - name: Get dependencies
+        run: flutter pub get
 
       - name: Build APK
         run: flutter build apk --release
