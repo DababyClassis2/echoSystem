@@ -1,50 +1,56 @@
 import 'dart:async';
 import 'package:multicast_dns/multicast_dns.dart';
 import '../models/device.dart';
+import '../server/server_config.dart';
 
 class MdnsDiscovery {
-  final String serviceType = '_localshare._tcp';
-  final MDnsClient _client = MDnsClient();
+  final _client = MDnsClient();
   final _controller = StreamController<DeviceCandidate>.broadcast();
+  bool _isRunning = false;
 
-  Stream<DeviceCandidate> get candidates => _controller.stream;
-
-  Future<void> start(String deviceName, int port) async {
-    await _client.start();
-    
-    // In a real app, we'd also register our own service here.
-    // multicast_dns doesn't support service registration directly on all platforms,
-    // usually handled by native system calls or other packages.
-    
-    _discover();
-    Timer.periodic(const Duration(seconds: 10), (_) => _discover());
-  }
-
-  Future<void> _discover() async {
-    try {
-      await for (final PtrRecord ptr in _client.lookup<PtrRecord>(
-        ResourceRecordQuery.serverPointer(serviceType),
-      )) {
-        await for (final SrvRecord srv in _client.lookup<SrvRecord>(
-          ResourceRecordQuery.service(ptr.domainName),
-        )) {
-          await for (final IPAddressRecord ip in _client.lookup<IPAddressRecord>(
-            ResourceRecordQuery.addressIPv4(srv.target),
-          )) {
-            _controller.add(DeviceCandidate(
-              ip: ip.address.address,
-              port: srv.port,
-              source: 'mDNS',
-            ));
+  Stream<DeviceCandidate> discover() async* {
+    _isRunning = true;
+    while (_isRunning) {
+      try {
+        await _client.start();
+        
+        // Query for PTR records
+        final ptrStream = _client.lookup<PtrResourceRecord>(
+          ResourceRecordQuery.serverPointer('_localshare._tcp.local'),
+        );
+        await for (final ptr in ptrStream) {
+          final serviceName = ptr.domainName;
+          // Query for SRV record
+          final srvStream = _client.lookup<SrvResourceRecord>(
+            ResourceRecordQuery.service(serviceName),
+          );
+          await for (final srv in srvStream) {
+            final hostName = srv.target;
+            final port = srv.port;
+            // Query for A record
+            final ipStream = _client.lookup<AResourceRecord>(
+              ResourceRecordQuery.address(hostName),
+            );
+            await for (final ip in ipStream) {
+              _controller.add(DeviceCandidate(
+                ip: ip.address.address,
+                port: port,
+                source: 'mdns',
+              ));
+            }
           }
         }
+        await _client.stop();
+      } catch (e) {
+        // ignore
       }
-    } catch (e) {
-      // Handle or log error
+      await Future.delayed(const Duration(seconds: 10));
     }
   }
 
   void stop() {
+    _isRunning = false;
     _client.stop();
+    _controller.close();
   }
 }

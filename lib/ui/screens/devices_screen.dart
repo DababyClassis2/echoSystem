@@ -125,7 +125,7 @@ class DevicesScreen extends ConsumerWidget {
     
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(8), border: Border.side(color: color.withOpacity(0.5))),
+      decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(8), border: Border.all(color: color.withOpacity(0.5))),
       child: Text("${ms}ms", style: AppTheme.monoStyle.copyWith(color: color, fontSize: 10, fontWeight: FontWeight.bold)),
     );
   }
