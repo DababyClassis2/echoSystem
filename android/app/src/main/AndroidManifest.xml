@@ -21,8 +21,9 @@
 
    <application
         android:label="localshare"
-        android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:name="\${applicationName}"
+        android:icon="@drawable/ic_launcher">
+
         <activity
             android:name=".MainActivity"
             android:exported="true"

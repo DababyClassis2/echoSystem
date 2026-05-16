@@ -29,7 +29,7 @@ class ChunkedUploader {
           'X-File-Name': fileName,
         }),
       );
-      offset = int.tryParse(headRes.headers.value('X-Received-Bytes') ?? '0') ?? 0;
+      offset = int.tryParse(headRes.headers['X-Received-Bytes']?.first ?? '0') ?? 0;
     } catch (_) {
       offset = 0;
     }

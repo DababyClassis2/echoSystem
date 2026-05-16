@@ -48,9 +48,9 @@ class HomeScreen extends ConsumerWidget {
                     ),
                   ),
                 ).animate(onPlay: (controller) => controller.repeat())
-                 .scale(begin: const Offset(0.8, 0.8), end: const Offset(1.2, 1.2), duration: 1000.ms, curve: Curves.easeInOut)
+                 .scale(begin: 0.8, end: 1.2, duration: 1000.ms, curve: Curves.easeInOut)
                  .then()
-                 .scale(begin: const Offset(1.2, 1.2), end: const Offset(0.8, 0.8), duration: 1000.ms, curve: Curves.easeInOut),
+                 .scale(begin: 1.2, end: 0.8, duration: 1000.ms, curve: Curves.easeInOut),
               ),
             ),
             const SizedBox(height: 24),

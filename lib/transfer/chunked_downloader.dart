@@ -39,11 +39,11 @@ class ChunkedDownloader {
         ),
       );
 
-      final contentRange = response.headers.value('content-range');
+      final contentRange = response.headers['content-range']?.first;
       if (contentRange != null) {
         totalBytes = int.tryParse(contentRange.split('/').last) ?? 0;
       } else {
-        totalBytes = int.tryParse(response.headers.value('content-length') ?? '0') ?? 0;
+        totalBytes = int.tryParse(response.headers['content-length']?.first ?? '0') ?? 0;
         totalBytes += offset;
       }
 
