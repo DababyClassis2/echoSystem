@@ -55,7 +55,7 @@ class DevicesScreen extends ConsumerWidget {
         children: [
           Icon(Icons.radar, size: 100, color: AppTheme.primaryColor.withOpacity(0.2))
               .animate(onPlay: (c) => c.repeat())
-              .scale(begin: 0.8, end: 1.2, duration: 2.seconds)
+              .scale(begin: const Offset(0.8, 0.8), end: const Offset(1.2, 1.2), duration: 2.seconds)
               .fadeOut(duration: 2.seconds),
           const SizedBox(height: 24),
           const Text("Scanning for peers...", style: TextStyle(color: Colors.grey)),
