@@ -1,5 +1,4 @@
 name: Build LocalShare APK
-
 on:
   push:
     branches: [ main ]
@@ -12,52 +11,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Build Web Client
-        run: |
-          cd web-client
-          npm install
-          npm run build:android
-          cd ..
-
       - name: Setup Java
         uses: actions/setup-java@v4
-        with:
-          distribution: 'zulu'
-          java-version: '17'
-
+        with: { distribution: 'zulu', java-version: '17' }
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.27.4'
-          channel: 'stable'
-
-      - name: Create local.properties
-        run: echo "flutter.sdk=$FLUTTER_ROOT" > android/local.properties
-
-      - name: Fix Gradle wrapper (use Flutter's default)
+        with: { flutter-version: '3.27.4', channel: 'stable' }
+      - name: Prepare environment
         run: |
-          # Remove any existing gradle wrapper that might be broken
-          rm -rf android/gradle android/gradlew android/gradlew.bat
-          # Let Flutter create a fresh, compatible wrapper
-          cd android
-          flutter build apk --dry-run || true
-          cd ..
-        continue-on-error: true
-
-      - name: Get dependencies
-        run: flutter pub get
-
+          echo "flutter.sdk=$FLUTTER_ROOT" > android/local.properties
+          mkdir -p assets/web && touch assets/web/.gitkeep
       - name: Build APK
-        run: flutter build apk --release
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: localshare-release-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+        run: |
+          flutter pub get
+          flutter build apk --release
+      - uses: actions/upload-artifact@v4
+        with: { name: 'apk', path: 'build/app/outputs/flutter-apk/app-release.apk' }
